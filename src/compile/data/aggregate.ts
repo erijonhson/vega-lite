@@ -162,6 +162,7 @@ export class AggregateNode extends TransformNode {
         out[this.measures[field][op] || `${op}_${field}`] = true;
       }
     }
+    keys(this.dimensions).forEach(f => (out[f] = true));
 
     return out;
   }

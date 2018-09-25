@@ -46,11 +46,23 @@ export class WindowTransformNode extends TransformNode {
     super(parent);
   }
 
+  public dependentFields() {
+    const out = {};
+
+    this.transform.groupby.forEach(f => (out[f] = true));
+    this.transform.sort.forEach(m => (out[m.field] = true));
+    this.transform.window
+      .map(w => w.field)
+      .filter(f => f !== undefined)
+      .forEach(f => (out[f] = true));
+
+    return out;
+  }
+
   public producedFields() {
     const out = {};
-    this.transform.window.forEach(windowFieldDef => {
-      out[this.getDefaultName(windowFieldDef)] = true;
-    });
+    this.transform.window.forEach(windowFieldDef => (out[this.getDefaultName(windowFieldDef)] = true));
+    this.transform.groupby.forEach(f => (out[f] = true));
 
     return out;
   }

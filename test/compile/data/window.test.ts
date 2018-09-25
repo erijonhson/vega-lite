@@ -27,12 +27,11 @@ describe('compile/data/window', () => {
   });
 
   it('does not create any window nodes for crossed facet', () => {
-    assert.deepEqual(
+    expect(
       WindowTransformNode.makeFromFacet(null, {
         row: {field: 'a', type: 'nominal'}
-      }),
-      null
-    );
+      })
+    ).toEqual(null);
   });
 
   it('should return a proper vg transform', () => {
@@ -54,7 +53,7 @@ describe('compile/data/window', () => {
       frame: [null, 0]
     };
     const window = new WindowTransformNode(null, transform);
-    assert.deepEqual(window.assemble(), {
+    expect(window.assemble()).toEqual({
       type: 'window',
       ops: ['row_number'],
       fields: [null],
@@ -89,7 +88,7 @@ describe('compile/data/window', () => {
       frame: [null, 0]
     };
     const window = new WindowTransformNode(null, transform);
-    assert.deepEqual(window.assemble(), {
+    expect(window.assemble()).toEqual({
       type: 'window',
       ops: ['row_number'],
       fields: [null],
@@ -128,11 +127,33 @@ describe('compile/data/window', () => {
           order: 'ascending'
         }
       ],
-      groupby: ['f'],
+      groupby: ['g'],
       frame: [null, 0]
     };
     const window = new WindowTransformNode(null, transform);
-    assert.deepEqual({count_field: true, ordered_row_number: true, sum_field: true}, window.producedFields());
+    expect({count_field: true, ordered_row_number: true, sum_field: true, g: true}).toEqual(window.producedFields());
+  });
+
+  it('should generate the correct dependent fields', () => {
+    const transform: Transform = {
+      window: [
+        {
+          op: 'row_number',
+          as: 'ordered_row_number'
+        }
+      ],
+      ignorePeers: false,
+      sort: [
+        {
+          field: 'f',
+          order: 'ascending'
+        }
+      ],
+      groupby: ['g'],
+      frame: [null, 0]
+    };
+    const window = new WindowTransformNode(null, transform);
+    expect(window.dependentFields()).toEqual({g: true, f: true});
   });
 
   it('should clone to an equivalent version', () => {
@@ -154,7 +175,7 @@ describe('compile/data/window', () => {
       frame: [null, 0]
     };
     const window = new WindowTransformNode(null, transform);
-    assert.deepEqual(window, window.clone());
+    expect(window).toEqual(window.clone());
   });
 
   it('should generate the correct hash', () => {
@@ -177,6 +198,6 @@ describe('compile/data/window', () => {
     };
     const window = new WindowTransformNode(null, transform);
     const hash = window.hash();
-    assert.deepEqual(hash, 'WindowTransform 1103660051');
+    assert.equal(hash, 'WindowTransform 1103660051');
   });
 });
